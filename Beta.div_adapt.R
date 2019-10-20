@@ -1,66 +1,51 @@
-Beta.div_adapt<- function(Y, tree, trait,nperm=999, method= "distance.based"){
+Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
+  require(SYNCSA)
+  require(vegan)
   if(dim(Y)[1]<=1){
     stop("\n matrix Y must be at least three communities\n")
   }
-  if(sum(is.na(match(colnames(Y),tree$tip.label)))>0){
+  if(sum(is.na(match(colnames(Y),rownames(dist_spp))))>0){ # esssa parte poderia que ficar como opcional, se nao tiver nomes em Y nao funciona
     stop("\n there are species in community matrix no present in phylogeny\n")
   }
   if(is.matrix(Y)==FALSE){
-    as.matrix(Y)
+    Y <- as.matrix(Y)
   }
-  P<-SYNCSA::matrix.p(comm = Y, phylodist= cophenetic(tree),notification = FALSE)$matrix.P
-  X<-SYNCSA::matrix.x(comm = Y,traits = as.matrix(trait),scale = FALSE,notification = FALSE)$matrix.X
-  if(method=="raw.data"){
-    P<- vegan::decostand(P,method = "normalize")
-    X<- vegan::decostand(X, method= "normalize")
-    BDp_all<- beta.div(Y = P, method = "none", sqrt.D = FALSE, nperm = 2)
-    BDx_all<- beta.div(Y = X, method = "none", sqrt.D = FALSE, nperm= 2)
-    BDp<- BDp_all$SStotal_BDtotal[2]
-    BDx<- BDx_all$SStotal_BDtotal[2]
-    PLCBD<- BDp_all$LCBD
-    XLCBD<- BDx_all$LCBD
-    PSCBD<- BDp_all$SCBD
-    XSCBD<- BDx_all$SCBD
+  
+  if(sum(is.na(match(colnames(Y), rownames(dist_spp))))>=1){
+    stop("\n species names in Y and phylogenetic tree must be the same\n")
   }
-  BDp_all<- beta.div(Y = P, method = "percentagedifference", sqrt.D = TRUE, nperm = 2)
-  BDx_all<- beta.div(Y = X, method = "percentagedifference", sqrt.D = TRUE, nperm = 2)
-  BDp<- BDp_all$SStotal_BDtotal[2]
-  BDx<- BDx_all$SStotal_BDtotal[2]
-  PLCBD<- BDp_all$LCBD
-  XLCBD<- BDx_all$LCBD
-  BD_allNull<- matrix(NA, nrow = nperm, ncol= 2, dimnames= list(paste("run",1:nperm, sep = ""), c("BDp_null", "BDx_null")))
-  PLCBD_allNull<- matrix(NA, nrow = nperm, ncol= nrow(Y), dimnames= list(paste("run", 1:nperm, sep=""), 1:nrow(Y)))
-  XLCBD_allNull<- matrix(NA, nrow = nperm, ncol= nrow(Y), dimnames= list(paste("run", 1:nperm, sep=""), 1:nrow(Y)))
+  Yorg<- Y[,match(colnames(Y), rownames(dist_spp))]
+  fuzzy_mat<- SYNCSA::matrix.p(comm = Yorg, phylodist = dist_spp, notification = FALSE)$matrix.P
+  if(method =="raw"){ # no texto de ajuda esse metodo se chama raw
+    fuzzy_matDecos<- vegan::decostand(fuzzy_mat,method = "normalize")
+    BDextend_all<- beta.div(Y = fuzzy_matDecos, method = "none", sqrt.D = FALSE, samp = TRUE, nperm = 0) 
+    SCBDextend<- BDextend_all$SCBD #SCBD component
+  } else{ 
+    BDextend_res<- beta.div(Y = fuzzy_mat, method = "percentagedifference", sqrt.D = TRUE, samp = TRUE, nperm = 0) #distance based calculation
+  }
+  BDextend<- BDextend_all$SStotal_BDtotal[2] #BD measure
+  LCBDextend<- BDextend_all$LCBD #LCBD measure
+  BD_allNull<- matrix(NA, nrow = nperm, ncol= 1, dimnames= list(paste("run",1:nperm, sep = ""), "BDextend_null"))
+  LCBDextend_allNull<- matrix(NA, nrow = nperm, ncol= nrow(Y), dimnames= list(paste("run", 1:nperm, sep=""), 1:nrow(Y)))
+  SAMP <- permut.vector(ncol(Y), nset = nperm)
   for(i in 1:nperm) {
-    distspp_null <- picante::taxaShuffle(cophenetic(tree)) #taxa shuffle matrix P
-    distrait_null<- picante::taxaShuffle(dist(trait)) #taxa shuffle matrix X
-    match.namesP <- match(colnames(comm), colnames(distspp_null)) 
-    match.namesX<- match(colnames(comm), colnames(distrait_null))
-    matrixP_null<- SYNCSA::matrix.p(ifelse(comm>=1,1,0),as.matrix(distspp_null[match.namesP,match.namesP]))$matrix.P #matrix P taxa shuffle
-    matrixX_null<- SYNCSA::matrix.p(ifelse(comm>=1,1,0),as.matrix(distrait_null[match.namesX,match.namesX]))$matrix.P #matrix X taxa shuffle
-    match.namesP <- match(colnames(Y), colnames(distspp_null))
-    match.namesX<- match(colnames(Y), colnames(distrait_null))
-    P.null<-SYNCSA::matrix.p(comm = Y,phylodist = distspp_null[match.namesP,match.namesP],notification = FALSE)$matrix.P
-    X.null<-SYNCSA::matrix.p(comm = Y,phylodist = distrait_null[match.namesX,match.namesX],notification = FALSE)$matrix.P
-    if(method =="raw.data"){
-      P.null<- vegan::decostand(P.null, method="normalize")
-      X.null<- vegan::decostand(X.null, method="normalize")
+    distspp_null <- dist_spp[SAMP[i,],SAMP[i,]] #taxa shuffle matrix P
+    fuzzyExtend_null<-SYNCSA::matrix.p(comm = Y, phylodist = distspp_null, notification = FALSE)$matrix.P 
+    if(method =="raw"){
+      fuzzyExtDecost_null<- vegan::decostand(fuzzyExtend_null, method="normalize")
+      BDextend_allNull<- beta.div(Y = fuzzyExtDecost_null, method = "none", sqrt.D = FALSE, samp = TRUE, nperm = 0)
+    } else{
+      BDextend_allNull<- beta.div(Y = fuzzyExtend_null, method = "percentagedifference", sqrt.D = TRUE, samp = TRUE, nperm = 0)
     }
-    BDp_allNull<- beta.div(Y = P.null, method = "percentagedifference", sqrt.D = TRUE, samp = 2)
-    BDx_allNull<- beta.div(Y = X.null, method = "percentagedifference", sqrt.D = TRUE, samp = 2)
-    BD_allNull[i,1]<- BDp_allNull$SStotal_BDtotal[2]
-    BD_allNull[i,2]<- BDx_allNull$SStotal_BDtotal[2]
-    PLCBD_allNull[i,]<- BDp_allNull$LCBD
-    XLCBD_allNull[i,]<- BDx_allNull$LCBD
+    
+    BD_allNull[i,1]<- BDextend_allNull$SStotal_BDtotal[2]
+    LCBDextend_allNull[i,]<- BDextend_allNull$LCBD
   }
-  p.BDp<- (sum(ifelse(BD_allNull[,"BDp_null"] >= BDp, 1, 0)) + 1)/(nperm + 1)
-  p.BDx<- (sum(ifelse(BD_allNull[,"BDx_null"] >= BDx, 1, 0)) + 1)/(nperm + 1)
-  p.PLCBD<- numeric(length = ncol(Y))
-  p.XLCBD<- numeric(length = ncol(Y))
+  ptaxa.BDextend<- (sum(ifelse(BD_allNull[,"BDextend_null"] >= BDextend, 1, 0)) + 1)/(nperm + 1)
+  ptaxa.LCBDextend<- numeric(length = ncol(Y))
   for(j in 1:nrow(Y)){
-    p.PLCBD[j]<- (sum(ifelse(PLCBD_allNull[,j] >= PLCBD[j], 1, 0)) + 1)/(nperm + 1)
-    p.XLCBD[j]<- (sum(ifelse(XLCBD_allNull[,j] >= XLCBD[j], 1, 0)) + 1)/(nperm + 1)
+    ptaxa.LCBDextend[j]<- (sum(ifelse(LCBDextend_allNull[,j] >= LCBDextend[j], 1, 0)) + 1)/(nperm + 1)
   }
-  return(list(BD.obs= c(BDp, BDx), LCBD.obs= matrix(c(PLCBD, XLCBD), nrow= 2, ncol= nrow(Y), byrow= TRUE, dimnames= list(c("PLCBD","XLCBD"), 1:nrow(Y))),
-              p.BD= c(p.BDp, p.BDx), p.LCBD= matrix(c(PLCBD, XLCBD), nrow= 2, ncol= nrow(Y), byrow= TRUE, dimnames= list(c("p.PLCBD","p.XLCBD"), 1:nrow(Y)))))
+  return(list(BDextend.obs= BDextend, LCBDextend.obs= LCBDextend,
+              ptaxa.BDextend= ptaxa.BDextend, ptaxa.LCBDextend= ptaxa.LCBDextend))
 }
