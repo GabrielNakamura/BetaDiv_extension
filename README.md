@@ -1,5 +1,5 @@
 # Beta_div function
-Function to compute functional and phylogenetic **Beta Diversity** (BD) (BD<sub>F</sub> and BD<sub>P</sub>). This is an extension of the method originally proposed by [Legendre and De Cáceres 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.12141).
+Function to compute phylogenetic or functional **Beta Diversity** (BD) (BD<sub>F</sub> and BD<sub>P</sub>). This is an extension of the method originally proposed by [Legendre and De Cáceres 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.12141).
 
 ### Important
 
@@ -14,17 +14,15 @@ Beta.div_adapt function computes functional and phylogenetic BD and its componen
 
 Y= metacommunity composition matrix, communities in rows and species in columns; 
 
-tree= phylogenetic tree, must be in newick format;
+dist_spp= matrix of pairwise distance among species;
 
-trait= vector of quantitative traits for all species in Y;
+nperm= number of permutation used to compute p values of BD<sub>F</sub> or BD<sub>P</sub> and its components;
 
-nperm= number of permutation used to compute p values of BD<sub>F</sub> and BD<sub>P</sub> and its components;
-
-method= method used to calculate Beta diversity and its components. "distance.based" (default) or "raw";
+method= method used to calculate Beta diversity and its components. "distance.based"  or "raw" (default);
 
 ### output:
 
-List object containing the following components: BD.obs - functional and phylogenetic beta diversity metrics (BD<sub>F</sub> and BD<sub>P</sub>);
-LCBD.obs - local components of BD<sub>F</sub> and BD<sub>P</sub>;
-p.BD and p.LCBD - p values calculating according to taxa shuffle null model.
+List object containing the following components: BDextend.obs - BD metric extended for functional or phylogenetic dimensions (BD<sub>F</sub> and BD<sub>P</sub>);
+LCBDextend.obs - local components of BDextend.obs;
+ptaxa.BDextend and ptaxa.LCBDextend - p values calculating according to taxa shuffle null model for BDextend.obs and LCBDextend.obs
 
