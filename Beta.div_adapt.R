@@ -4,7 +4,7 @@ Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
   if(dim(Y)[1]<=1){
     stop("\n matrix Y must be at least three communities\n")
   }
-  if(sum(is.na(match(colnames(Y),rownames(dist_spp))))>0){ # esssa parte poderia que ficar como opcional, se nao tiver nomes em Y nao funciona
+  if(sum(is.na(match(colnames(Y),rownames(dist_spp))))>0){
     stop("\n there are species in community matrix no present in phylogeny\n")
   }
   if(is.matrix(Y)==FALSE){
