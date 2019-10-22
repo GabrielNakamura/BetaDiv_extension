@@ -1,5 +1,5 @@
 # Beta_div function
-Function to compute phylogenetic or functional **Beta Diversity** (BD) (BD<sub>F</sub> and BD<sub>P</sub>). This is an extension of the method originally proposed by [Legendre and De Cáceres 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.12141).
+Function to compute phylogenetic or functional **Beta Diversity** (BD<sub>Fun</sub> and BD<sub>Phy</sub>). This is an extension of the method originally proposed by [Legendre and De Cáceres 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.12141).
 
 ### Important
 
@@ -22,7 +22,7 @@ method= method used to calculate Beta diversity and its components. "distance.ba
 
 ### output:
 
-List object containing the following components: BDextend.obs - BD metric extended for functional or phylogenetic dimensions (BD<sub>F</sub> and BD<sub>P</sub>);
+List object containing the following components: BDextend.obs - BD metric extended for functional or phylogenetic dimensions (BD<sub>Fun</sub> or BD<sub>Phy</sub>);
 LCBDextend.obs - local components of BDextend.obs;
 ptaxa.BDextend and ptaxa.LCBDextend - p values calculating according to taxa shuffle null model for BDextend.obs and LCBDextend.obs
 
