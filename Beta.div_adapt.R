@@ -16,7 +16,7 @@ Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
   }
   Yorg<- Y[,match(colnames(Y), rownames(dist_spp))]
   fuzzy_mat<- SYNCSA::matrix.p(comm = Yorg, phylodist = dist_spp, notification = FALSE)$matrix.P
-  if(method =="raw"){ # no texto de ajuda esse metodo se chama raw
+  if(method =="raw"){ 
     fuzzy_matDecos<- vegan::decostand(fuzzy_mat,method = "normalize")
     BDextend_all<- beta.div(Y = fuzzy_matDecos, method = "none", sqrt.D = FALSE, samp = TRUE, nperm = 0) 
     SCBDextend<- BDextend_all$SCBD #SCBD component
