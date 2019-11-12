@@ -1,10 +1,11 @@
 Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
   require(SYNCSA)
   require(vegan)
+  require(adespatial)
   if(dim(Y)[1]<=1){
     stop("\n matrix Y must be at least three communities\n")
   }
-  if(sum(is.na(match(colnames(Y),rownames(dist_spp))))>0){
+  if(sum(is.na(match(colnames(Y),rownames(dist_spp))))>0){ 
     stop("\n there are species in community matrix no present in phylogeny\n")
   }
   if(is.matrix(Y)==FALSE){
@@ -17,13 +18,12 @@ Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
   Yorg<- Y[,match(colnames(Y), rownames(dist_spp))]
   fuzzy_mat<- SYNCSA::matrix.p(comm = Yorg, phylodist = dist_spp, notification = FALSE)$matrix.P
   if(method =="raw"){ 
-    fuzzy_matDecos<- vegan::decostand(fuzzy_mat,method = "normalize")
-    BDextend_all<- beta.div(Y = fuzzy_matDecos, method = "none", sqrt.D = FALSE, samp = TRUE, nperm = 0) 
+    BDextend_all<- beta.div(Y = fuzzy_mat, method = "chord", sqrt.D = FALSE, samp = TRUE, nperm = 0) 
     SCBDextend<- BDextend_all$SCBD #SCBD component
   } else{ 
-    BDextend_res<- beta.div(Y = fuzzy_mat, method = "percentagedifference", sqrt.D = TRUE, samp = TRUE, nperm = 0) #distance based calculation
+    BDextend_all<- beta.div(Y = fuzzy_mat, method = "percentdiff", sqrt.D = TRUE, samp = TRUE, nperm = 0) #distance based calculation
   }
-  BDextend<- BDextend_all$SStotal_BDtotal[2] #BD measure
+  BDextend<- BDextend_all$beta[2] #BD measure
   LCBDextend<- BDextend_all$LCBD #LCBD measure
   BD_allNull<- matrix(NA, nrow = nperm, ncol= 1, dimnames= list(paste("run",1:nperm, sep = ""), "BDextend_null"))
   LCBDextend_allNull<- matrix(NA, nrow = nperm, ncol= nrow(Y), dimnames= list(paste("run", 1:nperm, sep=""), 1:nrow(Y)))
@@ -32,13 +32,11 @@ Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
     distspp_null <- dist_spp[SAMP[i,],SAMP[i,]] #taxa shuffle matrix P
     fuzzyExtend_null<-SYNCSA::matrix.p(comm = Y, phylodist = distspp_null, notification = FALSE)$matrix.P 
     if(method =="raw"){
-      fuzzyExtDecost_null<- vegan::decostand(fuzzyExtend_null, method="normalize")
-      BDextend_allNull<- beta.div(Y = fuzzyExtDecost_null, method = "none", sqrt.D = FALSE, samp = TRUE, nperm = 0)
+      BDextend_allNull<- beta.div(Y = fuzzyExtend_null, method = "chord", sqrt.D = FALSE, samp = TRUE, nperm = 0)
     } else{
-      BDextend_allNull<- beta.div(Y = fuzzyExtend_null, method = "percentagedifference", sqrt.D = TRUE, samp = TRUE, nperm = 0)
+      BDextend_allNull<- beta.div(Y = fuzzyExtend_null, method = "percentdiff", sqrt.D = TRUE, samp = TRUE, nperm = 0)
     }
-    
-    BD_allNull[i,1]<- BDextend_allNull$SStotal_BDtotal[2]
+    BD_allNull[i,1]<- BDextend_allNull$beta[2]
     LCBDextend_allNull[i,]<- BDextend_allNull$LCBD
   }
   ptaxa.BDextend<- (sum(ifelse(BD_allNull[,"BDextend_null"] >= BDextend, 1, 0)) + 1)/(nperm + 1)
