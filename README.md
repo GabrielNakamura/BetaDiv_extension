@@ -20,5 +20,6 @@ method= method used to calculate Beta diversity and its components.  "raw" (defa
 
 List object containing the following components: BDextend.obs - BD metric extended for functional or phylogenetic dimensions (BD<sub>Fun</sub> or BD<sub>Phy</sub>);
 LCBDextend.obs - local components of BDextend.obs;
+SCBDextend.obs - species contribution component of BDextend.obs (applicable only when used with "raw" method);
 ptaxa.BDextend and ptaxa.LCBDextend - p values calculating according to taxa shuffle null model for BDextend.obs and LCBDextend.obs
 
