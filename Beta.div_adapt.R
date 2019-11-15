@@ -40,10 +40,15 @@ Beta.div_adapt<- function(Y, dist_spp, nperm=999, method = "raw"){
     LCBDextend_allNull[i,]<- BDextend_allNull$LCBD
   }
   ptaxa.BDextend<- (sum(ifelse(BD_allNull[,"BDextend_null"] >= BDextend, 1, 0)) + 1)/(nperm + 1)
-  ptaxa.LCBDextend<- numeric(length = ncol(Y))
+  ptaxa.LCBDextend<- numeric(length = nrow(Y))
   for(j in 1:nrow(Y)){
     ptaxa.LCBDextend[j]<- (sum(ifelse(LCBDextend_allNull[,j] >= LCBDextend[j], 1, 0)) + 1)/(nperm + 1)
   }
-  return(list(BDextend.obs= BDextend, LCBDextend.obs= LCBDextend,
-              ptaxa.BDextend= ptaxa.BDextend, ptaxa.LCBDextend= ptaxa.LCBDextend))
+  if(method =="raw"){ 
+    return(list(BDextend.obs= BDextend, LCBDextend.obs= LCBDextend, SCBDextend.obs= SCBDextend,
+                ptaxa.BDextend= ptaxa.BDextend, ptaxa.LCBDextend= ptaxa.LCBDextend))
+  } else{ 
+    return(list(BDextend.obs= BDextend, LCBDextend.obs= LCBDextend,
+                ptaxa.BDextend= ptaxa.BDextend, ptaxa.LCBDextend= ptaxa.LCBDextend))
+  }
 }
