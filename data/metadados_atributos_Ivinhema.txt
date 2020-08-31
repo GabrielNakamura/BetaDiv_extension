@@ -1,0 +1,5 @@
+Metadados atributos_Ivinhema.txt
+
+AO: área do olho, corresponde a razão entre a distância das margens do olho e o comprimento total ao quadrado
+PVO: posição vertical do olho, corresponde a razão entre a distancia do centro do olho para margem e a altura da cabeça na linha do olho
+
