@@ -1,0 +1,26 @@
+---
+title: "Data and scripts for reproduce the analysis contained in the manuscript: 
+["A multifaceted approach to analyzing taxonomic, functional, and phylogenetic β diversity"](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/ecy.3122)"
+author: "Gabriel Nakamura"
+date: "01/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Authors
+
+Gabriel Nakamura, Yzel Rondon Súarez, Wagner Vicentin and Leandro Duarte
+
+In this repository you will find all scripts and data needed to reproduce the study performed by [Nakamura et al (2020)](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/ecy.3122)
+
+## Repository structure
+
+This repository follow the following structure
+```{r rep_str, echo=FALSE}
+fs::dir_tree(path = getwd())
+```
+
+* analysis_performance: this folder contains all scripts needed to generate simulated metacommunities under all scenarios described in [Nakamura et al. (2020)](https://esajournals.onlinelibrary.wiley.com/doi/abs/10.1002/ecy.3122) and test for power and type I error. Additionally, this folder contains a script to test for 
